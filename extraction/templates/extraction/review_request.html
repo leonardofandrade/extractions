@@ -1,0 +1,71 @@
+{% extends 'extraction/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Avaliar Solicitação #{{ request.id }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Avaliar Solicitação #{{ request.id }}</h2>
+        </div>
+        <div class="col text-end">
+            <a href="{% url 'extraction:request_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title mb-0">Detalhes da Solicitação</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <p><strong>Data da Solicitação:</strong> {{ request.request_date|date:"d/m/Y H:i" }}</p>
+                    <p><strong>Solicitante:</strong> {{ request.requested_by }}</p>
+                    <p><strong>Unidade Organizacional:</strong> {{ request.organization_unit }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Status Atual:</strong> {{ request.get_status_display }}</p>
+                    <p><strong>Procedimentos:</strong> {{ request.procedures.count }}</p>
+                    <p><strong>Documentos:</strong> {{ request.documents.count }}</p>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h5>Informações Adicionais:</h5>
+                <p class="mb-0">{{ request.additional_info|default:"Nenhuma informação adicional." }}</p>
+            </div>
+
+            {% if request.justification %}
+            <div class="mb-4">
+                <h5>Justificativa da Decisão:</h5>
+                <p class="mb-0">{{ request.justification }}</p>
+            </div>
+            {% endif %}
+
+            {% if request.status == 'requested' %}
+            <form method="post" class="mt-4">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="justification" class="form-label">Justificativa da Decisão</label>
+                    <textarea class="form-control" id="justification" name="justification" rows="3" required></textarea>
+                    <div class="form-text">Por favor, forneça uma justificativa para sua decisão.</div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="submit" name="action" value="approve" class="btn btn-success">
+                        <i class="fas fa-check"></i> Aprovar Solicitação
+                    </button>
+                    <button type="submit" name="action" value="reject" class="btn btn-danger">
+                        <i class="fas fa-times"></i> Rejeitar Solicitação
+                    </button>
+                </div>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% load crispy_forms_tags %}
+
+<!-- Modal Adicionar Procedimento -->
+<div class="modal fade" id="addProcedureModal" tabindex="-1" aria-labelledby="addProcedureModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="addProcedureModalLabel">Adicionar Procedimento</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'extraction:add_procedure' object.pk %}" id="addProcedureForm">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    {{ procedure_form|crispy }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Procedimento -->
+<div class="modal fade" id="editProcedureModal" tabindex="-1" aria-labelledby="editProcedureModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="editProcedureModalLabel">Editar Procedimento</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" id="editProcedureForm">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" id="procedure_id" name="procedure_id">
+                    {{ procedure_form|crispy }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-info">
+                        <i class="fas fa-save"></i> Atualizar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Excluir Procedimento -->
+<div class="modal fade" id="deleteProcedureModal" tabindex="-1" aria-labelledby="deleteProcedureModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteProcedureModalLabel">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" id="deleteProcedureForm">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" id="procedure_id" name="procedure_id">
+                    <p>Tem certeza que deseja excluir este procedimento?</p>
+                    <p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Esta ação não pode ser desfeita.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Excluir
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Configurar formulário de adição
+    $('#addProcedureForm').on('submit', function(e) {
+        e.preventDefault();
+        $.ajax({
+            url: $(this).attr('action'),
+            method: 'POST',
+            data: $(this).serialize(),
+            success: function(response) {
+                if (response.status === 'success') {
+                    location.reload();
+                } else {
+                    showToast('Erro ao adicionar procedimento. Verifique os dados.', 'danger');
+                }
+            },
+            error: function() {
+                showToast('Erro ao processar a requisição.', 'danger');
+            }
+        });
+    });
+
+    // Configurar formulário de edição
+    $('#editProcedureForm').on('submit', function(e) {
+        e.preventDefault();
+        const procedureId = $('#editProcedureModal #procedure_id').val();
+        const editUrl = '{% url "extraction:edit_procedure" pk=object.pk procedure_id=0 %}'.replace('/0/', '/' + procedureId + '/');
+        $.ajax({
+            url: editUrl,
+            method: 'POST',
+            data: $(this).serialize(),
+            success: function(response) {
+                if (response.status === 'success') {
+                    location.reload();
+                } else {
+                    showToast('Erro ao atualizar procedimento. Verifique os dados.', 'danger');
+                }
+            },
+            error: function() {
+                showToast('Erro ao processar a requisição.', 'danger');
+            }
+        });
+    });
+
+    // Configurar formulário de exclusão
+    $('#deleteProcedureForm').on('submit', function(e) {
+        e.preventDefault();
+        const procedureId = $('#deleteProcedureModal #procedure_id').val();
+        const deleteUrl = '{% url "extraction:delete_procedure" pk=object.pk procedure_id=0 %}'.replace('/0/', '/' + procedureId + '/');
+        $.ajax({
+            url: deleteUrl,
+            method: 'POST',
+            data: $(this).serialize(),
+            success: function(response) {
+                if (response.status === 'success') {
+                    location.reload();
+                } else {
+                    showToast('Erro ao excluir procedimento.', 'danger');
+                }
+            },
+            error: function() {
+                showToast('Erro ao processar a requisição.', 'danger');
+            }
+        });
+    });
+});
+</script>

@@ -1,0 +1,124 @@
+/* Estilização personalizada */
+.toast-container {
+    z-index: 1056;
+}
+
+.toast {
+    min-width: 300px;
+}
+
+.toast-header {
+    color: white;
+}
+
+.toast-header.bg-success {
+    background-color: #198754 !important;
+}
+
+.toast-header.bg-danger {
+    background-color: #dc3545 !important;
+}
+
+.toast-header.bg-warning {
+    background-color: #ffc107 !important;
+}
+
+.toast-header.bg-info {
+    background-color: #0dcaf0 !important;
+}
+
+/* Estilização do Select2 para combinar com Bootstrap 5 */
+.select2-container--default .select2-selection--single {
+    height: calc(1.5em + 0.75rem + 2px);
+    padding: 0.375rem 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 1.5;
+    padding-left: 0;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: calc(1.5em + 0.75rem + 2px);
+}
+
+/* Estilização para o header com imagem de fundo */
+header {
+    position: relative;
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+}
+
+header .container {
+    position: relative;
+    z-index: 2;
+}
+
+/* Estilização para os modais */
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Estilização para tabelas */
+.table th {
+    background-color: #f8f9fa;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Estilização para cards */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+/* Estilização para botões */
+.btn {
+    font-weight: 500;
+}
+
+.btn-icon {
+    padding: 0.25rem 0.5rem;
+}
+
+/* Estilização para formulários */
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .table-responsive {
+        margin-bottom: 1rem;
+    }
+}

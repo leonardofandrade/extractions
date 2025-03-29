@@ -1,0 +1,65 @@
+{% extends 'extraction/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if form.instance.pk %}Editar{% else %}Nova{% endif %} Solicitação de Extração{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>{% if form.instance.pk %}Editar{% else %}Nova{% endif %} Solicitação de Extração</h2>
+    </div>
+    <div class="col text-end">
+        <a href="{% url 'extraction:request_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" class="row g-3">
+            {% csrf_token %}
+            
+            <div class="col-md-6">
+                {{ form.request_date|as_crispy_field }}
+            </div>
+            
+            <div class="col-md-6">
+                {{ form.requested_by|as_crispy_field }}
+            </div>
+            
+            <div class="col-12">
+                {{ form.additional_info|as_crispy_field }}
+            </div>
+            
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Salvar
+                </button>
+                <a href="{% url 'extraction:request_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Configurar data atual no campo de data quando for nova solicitação
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!document.querySelector('#id_request_date').value) {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            document.querySelector('#id_request_date').value = 
+                `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+    });
+</script>
+{% endblock %}
