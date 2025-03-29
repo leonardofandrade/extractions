@@ -1,84 +1,43 @@
 {% load crispy_forms_tags %}
 
-<!-- Modal Adicionar Documento -->
+<!-- Add Document Modal -->
 <div class="modal fade" id="addDocumentModal" tabindex="-1" aria-labelledby="addDocumentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-info text-white">
+            <div class="modal-header">
                 <h5 class="modal-title" id="addDocumentModalLabel">Adicionar Documento</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="post" action="{% url 'extraction:add_document' object.pk %}" id="addDocumentForm" enctype="multipart/form-data">
+            <form id="addDocumentForm" method="post" action="{% url 'extraction:add_document' object.id %}" enctype="multipart/form-data">
+                {% csrf_token %}
                 <div class="modal-body">
-                    {% csrf_token %}
                     {{ document_form|crispy }}
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times"></i> Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-info">
-                        <i class="fas fa-save"></i> Salvar
-                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Modal Editar Documento -->
+<!-- Edit Document Modal -->
 <div class="modal fade" id="editDocumentModal" tabindex="-1" aria-labelledby="editDocumentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-info text-white">
+            <div class="modal-header">
                 <h5 class="modal-title" id="editDocumentModalLabel">Editar Documento</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="post" id="editDocumentForm" enctype="multipart/form-data">
+            <form id="editDocumentForm" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
                 <div class="modal-body">
-                    {% csrf_token %}
-                    <input type="hidden" id="document_id" name="document_id">
                     {{ document_form|crispy }}
-                    <small class="text-muted">Deixe o campo de arquivo em branco para manter o arquivo atual.</small>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times"></i> Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-info">
-                        <i class="fas fa-save"></i> Atualizar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Excluir Documento -->
-<div class="modal fade" id="deleteDocumentModal" tabindex="-1" aria-labelledby="deleteDocumentModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="deleteDocumentModalLabel">Confirmar Exclusão</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="post" id="deleteDocumentForm">
-                <div class="modal-body">
-                    {% csrf_token %}
-                    <input type="hidden" id="document_id" name="document_id">
-                    <p>Tem certeza que deseja excluir este documento?</p>
-                    <p class="text-danger">
-                        <i class="fas fa-exclamation-triangle"></i> 
-                        Esta ação não pode ser desfeita e o arquivo anexado será removido permanentemente.
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times"></i> Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash"></i> Excluir
-                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
                 </div>
             </form>
         </div>
@@ -86,63 +45,86 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Função para enviar formulário com arquivo
-    function submitFormWithFile(form, url, method) {
-        const formData = new FormData(form);
-        $.ajax({
-            url: url,
-            method: method,
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                if (response.status === 'success') {
-                    location.reload();
-                } else {
-                    showToast('Erro ao processar o documento. Verifique os dados.', 'danger');
+    $(document).ready(function() {
+        // Add Document
+        $('#addDocumentForm').on('submit', function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.status === 'success') {
+                        showToast('Documento adicionado com sucesso!', 'success');
+                        $('#addDocumentModal').modal('hide');
+                        location.reload();
+                    } else {
+                        showToast('Erro ao adicionar documento.', 'danger');
+                    }
+                },
+                error: function() {
+                    showToast('Erro ao adicionar documento.', 'danger');
                 }
-            },
-            error: function() {
-                showToast('Erro ao processar a requisição.', 'danger');
-            }
+            });
         });
-    }
 
-    // Configurar formulário de adição
-    $('#addDocumentForm').on('submit', function(e) {
-        e.preventDefault();
-        submitFormWithFile(this, $(this).attr('action'), 'POST');
-    });
+        // Edit Document
+        function editDocument(requestId, documentId) {
+            $.get(`/${requestId}/documents/${documentId}/edit/`).done(function(data) {
+                $('#editDocumentModal').modal('show');
+                $('#editDocumentForm').attr('action', `/${requestId}/documents/${documentId}/edit/`);
+            });
+        }
 
-    // Configurar formulário de edição
-    $('#editDocumentForm').on('submit', function(e) {
-        e.preventDefault();
-        const documentId = $('#editDocumentModal #document_id').val();
-        const editUrl = '{% url "extraction:edit_document" pk=object.pk document_id=0 %}'.replace('/0/', '/' + documentId + '/');
-        submitFormWithFile(this, editUrl, 'POST');
-    });
-
-    // Configurar formulário de exclusão
-    $('#deleteDocumentForm').on('submit', function(e) {
-        e.preventDefault();
-        const documentId = $('#deleteDocumentModal #document_id').val();
-        const deleteUrl = '{% url "extraction:delete_document" pk=object.pk document_id=0 %}'.replace('/0/', '/' + documentId + '/');
-        $.ajax({
-            url: deleteUrl,
-            method: 'POST',
-            data: $(this).serialize(),
-            success: function(response) {
-                if (response.status === 'success') {
-                    location.reload();
-                } else {
-                    showToast('Erro ao excluir documento.', 'danger');
+        $('#editDocumentForm').on('submit', function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.status === 'success') {
+                        showToast('Documento atualizado com sucesso!', 'success');
+                        $('#editDocumentModal').modal('hide');
+                        location.reload();
+                    } else {
+                        showToast('Erro ao atualizar documento.', 'danger');
+                    }
+                },
+                error: function() {
+                    showToast('Erro ao atualizar documento.', 'danger');
                 }
-            },
-            error: function() {
-                showToast('Erro ao processar a requisição.', 'danger');
-            }
+            });
         });
+
+        // Delete Document
+        function deleteDocument(requestId, documentId) {
+            if (confirm('Tem certeza que deseja excluir este documento?')) {
+                $.ajax({
+                    url: `/${requestId}/documents/${documentId}/delete/`,
+                    type: 'POST',
+                    data: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            showToast('Documento excluído com sucesso!', 'success');
+                            location.reload();
+                        } else {
+                            showToast('Erro ao excluir documento.', 'danger');
+                        }
+                    },
+                    error: function() {
+                        showToast('Erro ao excluir documento.', 'danger');
+                    }
+                });
+            }
+        }
     });
-});
 </script>

@@ -54,6 +54,11 @@ class ExtractionRequestListView(ListView):
         if org_unit:
             queryset = queryset.filter(organization_unit_id=org_unit)
         
+        # Ordenação
+        ordering = self.request.GET.get('ordering', '-id')
+        if ordering:
+            queryset = queryset.order_by(ordering)
+        
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -66,6 +71,7 @@ class ExtractionRequestListView(ListView):
             'year': self.request.GET.get('year', ''),
             'organization_unit': self.request.GET.get('organization_unit', ''),
         }
+        context['ordering'] = self.request.GET.get('ordering', '-id')
         return context
 
 class ExtractionRequestDetailView(DetailView):
@@ -115,15 +121,6 @@ class ExtractionRequestCreateView(CreateView):
         form.fields['organization_unit'].queryset = OrganizationUnit.objects.all()
         return form
 
-def send_to_analysis(request, pk):
-    extraction_request = get_object_or_404(ExtractionRequest, pk=pk)
-    try:
-        extraction_request.send_to_analysis()
-        messages.success(request, 'Solicitação enviada para análise com sucesso.')
-    except Exception as e:
-        messages.error(request, str(e))
-    return redirect('extraction:request_detail', pk=pk)
-
 def add_procedure(request, pk):
     if request.method == 'POST':
         extraction_request = get_object_or_404(ExtractionRequest, pk=pk)
@@ -132,23 +129,32 @@ def add_procedure(request, pk):
             procedure = form.save(commit=False)
             procedure.extraction_request = extraction_request
             procedure.save()
+            messages.success(request, 'Procedimento adicionado com sucesso.')
             return JsonResponse({'status': 'success'})
+        messages.error(request, 'Erro ao adicionar procedimento.')
         return JsonResponse({'status': 'error'})
 
 def edit_procedure(request, pk, procedure_id):
+    procedure = get_object_or_404(ExtractionRequestProcedure, pk=procedure_id)
     if request.method == 'POST':
-        procedure = get_object_or_404(ExtractionRequestProcedure, pk=procedure_id)
         form = ExtractionRequestProcedureForm(request.POST, instance=procedure)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Procedimento atualizado com sucesso.')
             return JsonResponse({'status': 'success'})
+        messages.error(request, 'Erro ao atualizar procedimento.')
         return JsonResponse({'status': 'error'})
+    else:
+        form = ExtractionRequestProcedureForm(instance=procedure)
+        return render(request, 'extraction/includes/procedure_form.html', {'procedure_form': form})
 
 def delete_procedure(request, pk, procedure_id):
     if request.method == 'POST':
         procedure = get_object_or_404(ExtractionRequestProcedure, pk=procedure_id)
         procedure.delete()
+        messages.success(request, 'Procedimento excluído com sucesso.')
         return JsonResponse({'status': 'success'})
+    messages.error(request, 'Erro ao excluir procedimento.')
     return JsonResponse({'status': 'error'})
 
 def add_document(request, pk):
@@ -159,23 +165,32 @@ def add_document(request, pk):
             document = form.save(commit=False)
             document.extraction_request = extraction_request
             document.save()
+            messages.success(request, 'Documento adicionado com sucesso.')
             return JsonResponse({'status': 'success'})
+        messages.error(request, 'Erro ao adicionar documento.')
         return JsonResponse({'status': 'error'})
 
 def edit_document(request, pk, document_id):
+    document = get_object_or_404(ExtractionRequestDocument, pk=document_id)
     if request.method == 'POST':
-        document = get_object_or_404(ExtractionRequestDocument, pk=document_id)
         form = ExtractionRequestDocumentForm(request.POST, request.FILES, instance=document)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Documento atualizado com sucesso.')
             return JsonResponse({'status': 'success'})
+        messages.error(request, 'Erro ao atualizar documento.')
         return JsonResponse({'status': 'error'})
+    else:
+        form = ExtractionRequestDocumentForm(instance=document)
+        return render(request, 'extraction/includes/document_form.html', {'document_form': form})
 
 def delete_document(request, pk, document_id):
     if request.method == 'POST':
         document = get_object_or_404(ExtractionRequestDocument, pk=document_id)
         document.delete()
+        messages.success(request, 'Documento excluído com sucesso.')
         return JsonResponse({'status': 'success'})
+    messages.error(request, 'Erro ao excluir documento.')
     return JsonResponse({'status': 'error'})
 
 def view_request(request, pk):
@@ -186,6 +201,15 @@ def view_request(request, pk):
         'documents': request_detail.documents.all()
     }
     return render(request, 'extraction/extraction_request_view.html', context)
+
+def send_to_analysis(request, pk):
+    extraction_request = get_object_or_404(ExtractionRequest, pk=pk)
+    try:
+        extraction_request.send_to_analysis()
+        messages.success(request, 'Solicitação enviada para análise com sucesso.')
+    except Exception as e:
+        messages.error(request, str(e))
+    return redirect('extraction:request_detail', pk=pk)
 
 def review_request(request, pk):
     request_detail = get_object_or_404(ExtractionRequest, pk=pk)
