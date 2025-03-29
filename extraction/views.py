@@ -110,6 +110,11 @@ class ExtractionRequestCreateView(CreateView):
         messages.success(self.request, 'Solicitação criada com sucesso.')
         return super().form_valid(form)
 
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['organization_unit'].queryset = OrganizationUnit.objects.all()
+        return form
+
 def send_to_analysis(request, pk):
     extraction_request = get_object_or_404(ExtractionRequest, pk=pk)
     try:

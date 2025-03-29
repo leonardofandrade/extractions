@@ -1,85 +1,46 @@
 {% extends 'extraction/base.html' %}
 {% load crispy_forms_tags %}
 
-{% block title %}Detalhes da Solicitação{% endblock %}
+{% block title %}Solicitação #{{ object.id }}{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col">
-        <h2>
-            Detalhes da Solicitação #{{ object.id }}
-            {% if object.status == 'draft' %}
-                <span class="badge bg-secondary">Pendente de Envio</span>
-            {% elif object.status == 'requested' %}
-                <span class="badge bg-primary">Solicitada</span>
-            {% elif object.status == 'approved' %}
-                <span class="badge bg-success">Aprovada</span>
-            {% elif object.status == 'rejected' %}
-                <span class="badge bg-danger">Rejeitada</span>
-            {% elif object.status == 'in_progress' %}
-                <span class="badge bg-info">Em Andamento</span>
-            {% elif object.status == 'completed' %}
-                <span class="badge bg-dark">Finalizada</span>
-            {% elif object.status == 'failed' %}
-                <span class="badge bg-danger">Finalizada - Falhou</span>
-            {% elif object.status == 'success' %}
-                <span class="badge bg-success">Finalizada - Sucesso</span>
-            {% endif %}
-        </h2>
+        <h2>Solicitação #{{ object.id }}</h2>
     </div>
     <div class="col text-end">
-        {% if object.status == 'draft' %}
-            <a href="{% url 'extraction:send_to_analysis' object.pk %}" 
-               class="btn btn-success" 
-               onclick="return confirm('Confirma o envio desta solicitação para análise?')">
-                <i class="fas fa-paper-plane"></i> Enviar para Análise
-            </a>
-        {% endif %}
         <a href="{% url 'extraction:request_list' %}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Voltar
         </a>
     </div>
 </div>
 
-<!-- Dados da Solicitação -->
 <div class="card mb-4">
     <div class="card-header bg-primary text-white">
-        <h5 class="card-title mb-0">Informações da Solicitação</h5>
+        <h5 class="card-title mb-0">Detalhes da Solicitação</h5>
     </div>
     <div class="card-body">
         <form method="post" class="row g-3">
             {% csrf_token %}
-            
-            <div class="col-md-6">
-                {{ form.request_date|as_crispy_field }}
-            </div>
-            
             <div class="col-md-6">
                 {{ form.requested_by|as_crispy_field }}
             </div>
-
-            <div class="col-12">
+            <div class="col-md-6">
                 {{ form.organization_unit|as_crispy_field }}
             </div>
-            
             <div class="col-12">
                 {{ form.additional_info|as_crispy_field }}
             </div>
-
-            {% if object.justification %}
+            {% if can_edit %}
             <div class="col-12">
-                <div class="mb-3">
-                    <label class="form-label"><strong>Justificativa da Decisão:</strong></label>
-                    <p class="form-control-static">{{ object.justification }}</p>
-                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Salvar
+                </button>
+                <a href="{% url 'extraction:request_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
             </div>
             {% endif %}
-            
-            <div class="col-12">
-                <button type="submit" class="btn btn-primary" {% if object.status != 'draft' %}disabled{% endif %}>
-                    <i class="fas fa-save"></i> Atualizar Solicitação
-                </button>
-            </div>
         </form>
     </div>
 </div>
@@ -88,9 +49,9 @@
 <div class="card mb-4">
     <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
         <h5 class="card-title mb-0">Procedimentos</h5>
-        {% if object.status == 'draft' %}
-        <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#addProcedureModal">
-            <i class="fas fa-plus"></i> Adicionar Procedimento
+        {% if can_edit %}
+        <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addProcedureModal">
+            <i class="fas fa-plus"></i> Adicionar
         </button>
         {% endif %}
     </div>
@@ -104,7 +65,7 @@
                             <th>Ano</th>
                             <th>Número</th>
                             <th>Informações Adicionais</th>
-                            {% if object.status == 'draft' %}
+                            {% if can_edit %}
                             <th>Ações</th>
                             {% endif %}
                         </tr>
@@ -116,26 +77,20 @@
                             <td>{{ procedure.year }}</td>
                             <td>{{ procedure.number }}</td>
                             <td>{{ procedure.additional_info|default:"-" }}</td>
-                            {% if object.status == 'draft' %}
+                            {% if can_edit %}
                             <td>
-                                <button type="button" 
-                                        class="btn btn-sm btn-info edit-procedure" 
-                                        data-id="{{ procedure.id }}"
-                                        data-type="{{ procedure.procedure_type.id }}"
-                                        data-year="{{ procedure.year }}"
-                                        data-number="{{ procedure.number }}"
-                                        data-info="{{ procedure.additional_info|default:'' }}"
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#editProcedureModal">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button type="button" 
-                                        class="btn btn-sm btn-danger delete-procedure"
-                                        data-id="{{ procedure.id }}"
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#deleteProcedureModal">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-warning" 
+                                            data-edit-url="{% url 'extraction:edit_procedure' object.id procedure.id %}"
+                                            onclick="editProcedure(this)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger" 
+                                            data-delete-url="{% url 'extraction:delete_procedure' object.id procedure.id %}"
+                                            onclick="deleteProcedure(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </td>
                             {% endif %}
                         </tr>
@@ -155,9 +110,9 @@
 <div class="card mb-4">
     <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
         <h5 class="card-title mb-0">Documentos</h5>
-        {% if object.status == 'draft' %}
-        <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#addDocumentModal">
-            <i class="fas fa-plus"></i> Adicionar Documento
+        {% if can_edit %}
+        <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addDocumentModal">
+            <i class="fas fa-plus"></i> Adicionar
         </button>
         {% endif %}
     </div>
@@ -172,7 +127,7 @@
                             <th>Número</th>
                             <th>Arquivo</th>
                             <th>Informações Adicionais</th>
-                            {% if object.status == 'draft' %}
+                            {% if can_edit %}
                             <th>Ações</th>
                             {% endif %}
                         </tr>
@@ -189,26 +144,20 @@
                                 </a>
                             </td>
                             <td>{{ document.additional_info|default:"-" }}</td>
-                            {% if object.status == 'draft' %}
+                            {% if can_edit %}
                             <td>
-                                <button type="button" 
-                                        class="btn btn-sm btn-info edit-document" 
-                                        data-id="{{ document.id }}"
-                                        data-type="{{ document.document_type.id }}"
-                                        data-year="{{ document.year }}"
-                                        data-number="{{ document.number }}"
-                                        data-info="{{ document.additional_info|default:'' }}"
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#editDocumentModal">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button type="button" 
-                                        class="btn btn-sm btn-danger delete-document"
-                                        data-id="{{ document.id }}"
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#deleteDocumentModal">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-warning" 
+                                            data-edit-url="{% url 'extraction:edit_document' object.id document.id %}"
+                                            onclick="editDocument(this)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger" 
+                                            data-delete-url="{% url 'extraction:delete_document' object.id document.id %}"
+                                            onclick="deleteDocument(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </td>
                             {% endif %}
                         </tr>
@@ -224,8 +173,18 @@
     </div>
 </div>
 
-<!-- Modais -->
-{% if object.status == 'draft' %}
+{% if can_edit %}
+<div class="row">
+    <div class="col text-end">
+        <form method="post" action="{% url 'extraction:send_to_analysis' object.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i> Enviar para Análise
+            </button>
+        </form>
+    </div>
+</div>
+
 {% include 'extraction/includes/procedure_modals.html' %}
 {% include 'extraction/includes/document_modals.html' %}
 {% endif %}
@@ -234,53 +193,51 @@
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar Select2
-    $('.select2').select2({
-        theme: 'bootstrap-5',
-        width: '100%'
+    $(document).ready(function() {
+        $('.select2').select2({
+            theme: 'bootstrap-5',
+            width: '100%'
+        });
     });
 
-    // Handlers para edição de Procedimento
-    $('.edit-procedure').click(function() {
-        const id = $(this).data('id');
-        const type = $(this).data('type');
-        const year = $(this).data('year');
-        const number = $(this).data('number');
-        const info = $(this).data('info');
+    function editProcedure(button) {
+        const url = button.getAttribute('data-edit-url');
+        $.get(url).done(function(data) {
+            $('#editProcedureModal').modal('show');
+        });
+    }
 
-        $('#editProcedureModal #procedure_id').val(id);
-        $('#editProcedureModal #id_procedure_type').val(type).trigger('change');
-        $('#editProcedureModal #id_year').val(year);
-        $('#editProcedureModal #id_number').val(number);
-        $('#editProcedureModal #id_additional_info').val(info);
-    });
+    function deleteProcedure(button) {
+        if (confirm('Tem certeza que deseja excluir este procedimento?')) {
+            const url = button.getAttribute('data-delete-url');
+            $.post(url, {
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            }).done(function(response) {
+                if (response.status === 'success') {
+                    location.reload();
+                }
+            });
+        }
+    }
 
-    // Handlers para edição de Documento
-    $('.edit-document').click(function() {
-        const id = $(this).data('id');
-        const type = $(this).data('type');
-        const year = $(this).data('year');
-        const number = $(this).data('number');
-        const info = $(this).data('info');
+    function editDocument(button) {
+        const url = button.getAttribute('data-edit-url');
+        $.get(url).done(function(data) {
+            $('#editDocumentModal').modal('show');
+        });
+    }
 
-        $('#editDocumentModal #document_id').val(id);
-        $('#editDocumentModal #id_document_type').val(type).trigger('change');
-        $('#editDocumentModal #id_year').val(year);
-        $('#editDocumentModal #id_number').val(number);
-        $('#editDocumentModal #id_additional_info').val(info);
-    });
-
-    // Handlers para exclusão
-    $('.delete-procedure').click(function() {
-        const id = $(this).data('id');
-        $('#deleteProcedureModal #procedure_id').val(id);
-    });
-
-    $('.delete-document').click(function() {
-        const id = $(this).data('id');
-        $('#deleteDocumentModal #document_id').val(id);
-    });
-});
+    function deleteDocument(button) {
+        if (confirm('Tem certeza que deseja excluir este documento?')) {
+            const url = button.getAttribute('data-delete-url');
+            $.post(url, {
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            }).done(function(response) {
+                if (response.status === 'success') {
+                    location.reload();
+                }
+            });
+        }
+    }
 </script>
 {% endblock %}

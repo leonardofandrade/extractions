@@ -5,12 +5,14 @@ class ExtractionRequestForm(forms.ModelForm):
     class Meta:
         model = ExtractionRequest
         fields = ['requested_by', 'organization_unit', 'additional_info']
+        labels = {
+            'requested_by': 'Solicitado por',
+            'organization_unit': 'Unidade Organizacional',
+            'additional_info': 'Informações Adicionais'
+        }
         widgets = {
             'requested_by': forms.TextInput(attrs={'class': 'form-control'}),
-            'organization_unit': forms.Select(attrs={
-                'class': 'form-control select2',
-                'required': True
-            }),
+            'organization_unit': forms.Select(attrs={'class': 'form-control select2'}),
             'additional_info': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
