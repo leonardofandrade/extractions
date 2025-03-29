@@ -1,10 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import ExtractionRequest
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django.db.models import Q
+from django.utils import timezone
 from .models import (
     ExtractionRequest, 
     ExtractionRequestProcedure, 
@@ -100,7 +100,13 @@ class ExtractionRequestCreateView(CreateView):
     template_name = 'extraction/extraction_request_form.html'
     success_url = reverse_lazy('extraction:request_list')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['organization_units'] = OrganizationUnit.objects.all()
+        return context
+
     def form_valid(self, form):
+        form.instance.request_date = timezone.now()
         messages.success(self.request, 'Solicitação criada com sucesso.')
         return super().form_valid(form)
 

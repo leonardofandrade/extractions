@@ -4,11 +4,13 @@ from .models import ExtractionRequest, ExtractionRequestProcedure, ExtractionReq
 class ExtractionRequestForm(forms.ModelForm):
     class Meta:
         model = ExtractionRequest
-        fields = ['request_date', 'requested_by', 'organization_unit', 'additional_info']
+        fields = ['requested_by', 'organization_unit', 'additional_info']
         widgets = {
-            'request_date': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
             'requested_by': forms.TextInput(attrs={'class': 'form-control'}),
-            'organization_unit': forms.Select(attrs={'class': 'form-control select2'}),
+            'organization_unit': forms.Select(attrs={
+                'class': 'form-control select2',
+                'required': True
+            }),
             'additional_info': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 

@@ -21,11 +21,11 @@
             {% csrf_token %}
             
             <div class="col-md-6">
-                {{ form.request_date|as_crispy_field }}
+                {{ form.requested_by|as_crispy_field }}
             </div>
             
             <div class="col-md-6">
-                {{ form.requested_by|as_crispy_field }}
+                {{ form.organization_unit|as_crispy_field }}
             </div>
             
             <div class="col-12">
@@ -47,19 +47,11 @@
 
 {% block extra_js %}
 <script>
-    // Configurar data atual no campo de data quando for nova solicitação
-    document.addEventListener('DOMContentLoaded', function() {
-        if (!document.querySelector('#id_request_date').value) {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            
-            document.querySelector('#id_request_date').value = 
-                `${year}-${month}-${day}T${hours}:${minutes}`;
-        }
+    $(document).ready(function() {
+        $('.select2').select2({
+            theme: 'bootstrap-5',
+            width: '100%'
+        });
     });
 </script>
 {% endblock %}

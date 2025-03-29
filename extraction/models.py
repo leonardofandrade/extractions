@@ -62,9 +62,7 @@ class ExtractionRequest(models.Model):
         OrganizationUnit,
         on_delete=models.PROTECT,
         verbose_name='Unidade Organizacional',
-        related_name='extraction_requests',
-        null=True,
-        blank=True
+        related_name='extraction_requests'
     )
     status = models.CharField(
         'Status',
