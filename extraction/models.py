@@ -91,8 +91,11 @@ class ExtractionRequest(models.Model):
         if not self.organization_unit:
             raise ValidationError('A unidade organizacional é obrigatória para enviar a solicitação.')
         
-        if not (self.procedures.exists() or self.documents.exists()):
-            raise ValidationError('A solicitação deve ter pelo menos um procedimento ou documento.')
+        if not self.procedures.exists():
+            raise ValidationError('A solicitação deve ter pelo menos um procedimento.')
+            
+        if not self.documents.exists():
+            raise ValidationError('A solicitação deve ter pelo menos um documento.')
         
         self.status = self.STATUS_REQUESTED
         self.save()
@@ -102,7 +105,7 @@ class ExtractionRequest(models.Model):
         return (
             self.status == self.STATUS_DRAFT and 
             self.organization_unit is not None and
-            (self.procedures.exists() or self.documents.exists())
+            self.procedures.exists() and self.documents.exists()
         )
 
 class ExtractionRequestProcedure(models.Model):
