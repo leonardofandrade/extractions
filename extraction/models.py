@@ -17,9 +17,10 @@ class OrganizationUnit(models.Model):
 
 class ProcedureType(models.Model):
     name = models.CharField('Nome', max_length=100)
+    code = models.CharField('Código', max_length=20, unique=True, default='PROC')
 
     def __str__(self):
-        return self.name
+        return f'{self.code} - {self.name}'
 
     class Meta:
         verbose_name = 'Tipo de Procedimento'
@@ -27,9 +28,10 @@ class ProcedureType(models.Model):
 
 class DocumentType(models.Model):
     name = models.CharField('Nome', max_length=100)
+    code = models.CharField('Código', max_length=20, unique=True, default='DOC')
 
     def __str__(self):
-        return self.name
+        return f'{self.code} - {self.name}'
 
     class Meta:
         verbose_name = 'Tipo de Documento'
