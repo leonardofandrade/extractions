@@ -18,6 +18,7 @@
     <!-- Custom CSS -->
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <link rel="stylesheet" href="{% static 'css/landing.css' %}">
 
     <style>
         .toast-container {
@@ -29,6 +30,39 @@
     </style>
 </head>
 <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'extraction:landing' %}">Sistema de Extração</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'extraction:request_list' %}">
+                                <i class="fas fa-list me-1"></i>Solicitações
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'extraction:logout' %}">
+                                <i class="fas fa-sign-out-alt me-1"></i>Sair
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'extraction:login' %}">
+                                <i class="fas fa-sign-in-alt me-1"></i>Entrar
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {% if not request.resolver_match.url_name in 'landing,login' %}
     <!-- Header com imagem de fundo -->
     <header class="bg-dark text-white py-4 mb-4" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://source.unsplash.com/random/1600x400?technology'); background-size: cover; background-position: center;">
         <div class="container">
@@ -36,6 +70,7 @@
             <p class="lead">Gerenciamento de Solicitações de Extração</p>
         </div>
     </header>
+    {% endif %}
 
     <!-- Container principal -->
     <div class="container mb-5">

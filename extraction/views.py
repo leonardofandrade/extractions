@@ -1,10 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, TemplateView
 from django.contrib import messages
-from django.urls import reverse_lazy
-from django.http import JsonResponse
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy, reverse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.db.models import Q
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 from .models import (
     ExtractionRequest, 
     ExtractionRequestProcedure, 
@@ -17,7 +20,22 @@ from .forms import (
     ExtractionRequestDocumentForm
 )
 
-class ExtractionRequestListView(ListView):
+class LandingPageView(TemplateView):
+    template_name = 'extraction/landing.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return HttpResponseRedirect(reverse('extraction:request_list'))
+        return super().dispatch(request, *args, **kwargs)
+
+class CustomLoginView(LoginView):
+    template_name = 'extraction/login.html'
+    redirect_authenticated_user = True
+    
+    def get_success_url(self):
+        return reverse('extraction:request_list')
+
+class ExtractionRequestListView(LoginRequiredMixin, ListView):
     paginate_by = 10  # Set the number of items per page
     model = ExtractionRequest
     template_name = 'extraction/extraction_request_list.html'
@@ -74,7 +92,7 @@ class ExtractionRequestListView(ListView):
         context['ordering'] = self.request.GET.get('ordering', '-id')
         return context
 
-class ExtractionRequestDetailView(DetailView):
+class ExtractionRequestDetailView(LoginRequiredMixin, DetailView):
     model = ExtractionRequest
     template_name = 'extraction/extraction_request_detail.html'
 
@@ -100,7 +118,7 @@ class ExtractionRequestDetailView(DetailView):
             messages.success(request, 'Solicitação atualizada com sucesso.')
         return self.get(request, *args, **kwargs)
 
-class ExtractionRequestCreateView(CreateView):
+class ExtractionRequestCreateView(LoginRequiredMixin, CreateView):
     model = ExtractionRequest
     form_class = ExtractionRequestForm
     template_name = 'extraction/extraction_request_form.html'
@@ -121,6 +139,7 @@ class ExtractionRequestCreateView(CreateView):
         form.fields['organization_unit'].queryset = OrganizationUnit.objects.all()
         return form
 
+@login_required
 def add_procedure(request, pk):
     if request.method == 'POST':
         extraction_request = get_object_or_404(ExtractionRequest, pk=pk)
@@ -134,6 +153,7 @@ def add_procedure(request, pk):
         messages.error(request, 'Erro ao adicionar procedimento.')
         return JsonResponse({'status': 'error'})
 
+@login_required
 def edit_procedure(request, pk, procedure_id):
     procedure = get_object_or_404(ExtractionRequestProcedure, pk=procedure_id)
     if request.method == 'POST':
@@ -148,6 +168,7 @@ def edit_procedure(request, pk, procedure_id):
         form = ExtractionRequestProcedureForm(instance=procedure)
         return render(request, 'extraction/includes/procedure_form.html', {'procedure_form': form})
 
+@login_required
 def delete_procedure(request, pk, procedure_id):
     if request.method == 'POST':
         procedure = get_object_or_404(ExtractionRequestProcedure, pk=procedure_id)
@@ -157,6 +178,7 @@ def delete_procedure(request, pk, procedure_id):
     messages.error(request, 'Erro ao excluir procedimento.')
     return JsonResponse({'status': 'error'})
 
+@login_required
 def add_document(request, pk):
     if request.method == 'POST':
         extraction_request = get_object_or_404(ExtractionRequest, pk=pk)
@@ -170,6 +192,7 @@ def add_document(request, pk):
         messages.error(request, 'Erro ao adicionar documento.')
         return JsonResponse({'status': 'error'})
 
+@login_required
 def edit_document(request, pk, document_id):
     document = get_object_or_404(ExtractionRequestDocument, pk=document_id)
     if request.method == 'POST':
@@ -184,6 +207,7 @@ def edit_document(request, pk, document_id):
         form = ExtractionRequestDocumentForm(instance=document)
         return render(request, 'extraction/includes/document_form.html', {'document_form': form})
 
+@login_required
 def delete_document(request, pk, document_id):
     if request.method == 'POST':
         document = get_object_or_404(ExtractionRequestDocument, pk=document_id)
@@ -193,6 +217,7 @@ def delete_document(request, pk, document_id):
     messages.error(request, 'Erro ao excluir documento.')
     return JsonResponse({'status': 'error'})
 
+@login_required
 def view_request(request, pk):
     request_detail = get_object_or_404(ExtractionRequest, pk=pk)
     context = {
@@ -202,6 +227,7 @@ def view_request(request, pk):
     }
     return render(request, 'extraction/extraction_request_view.html', context)
 
+@login_required
 def send_to_analysis(request, pk):
     extraction_request = get_object_or_404(ExtractionRequest, pk=pk)
     try:
@@ -211,6 +237,7 @@ def send_to_analysis(request, pk):
         messages.error(request, str(e))
     return redirect('extraction:request_detail', pk=pk)
 
+@login_required
 def review_request(request, pk):
     request_detail = get_object_or_404(ExtractionRequest, pk=pk)
     if request.method == 'POST':

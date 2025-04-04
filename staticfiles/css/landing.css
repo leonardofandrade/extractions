@@ -1,0 +1,91 @@
+/* Hero Section Styles */
+.hero-section {
+    padding: 6rem 0;
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                url('https://source.unsplash.com/random/1920x1080?technology') no-repeat center center;
+    background-size: cover;
+    color: white;
+    margin-top: -1.5rem;
+}
+
+/* Card Hover Effects */
+.card {
+    transition: transform 0.3s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Feature Icons */
+.fa-3x {
+    transition: color 0.3s ease-in-out;
+}
+
+.card:hover .fa-3x {
+    color: #0d6efd !important;
+}
+
+/* Login Form Styles */
+.login-container {
+    min-height: calc(100vh - 200px);
+    display: flex;
+    align-items: center;
+}
+
+.login-form {
+    max-width: 400px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* Custom Button Styles */
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+}
+
+.btn-outline-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.15);
+}
+
+/* Features Section */
+#features {
+    background-color: #f8f9fa;
+}
+
+.feature-card {
+    padding: 2rem;
+    text-align: center;
+    border-radius: 10px;
+    background: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Call to Action Section */
+.cta-section {
+    background: linear-gradient(45deg, #0d6efd, #0a58ca);
+    color: white;
+    border-radius: 10px;
+    padding: 4rem 2rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 4rem 0;
+    }
+    
+    .display-3 {
+        font-size: 2.5rem;
+    }
+    
+    .lead {
+        font-size: 1.1rem;
+    }
+}

@@ -1,0 +1,85 @@
+{% extends "extraction/base.html" %}
+{% load static %}
+
+{% block title %}Bem-vindo ao Sistema de Extração{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center py-5">
+    <div class="container">
+        <h1 class="display-3 mb-4">Sistema de Extração</h1>
+        <p class="lead mb-5">Gerencie suas solicitações de extração de forma eficiente e segura.</p>
+        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+            <a href="{% url 'extraction:login' %}" class="btn btn-primary btn-lg px-4 gap-3">
+                <i class="fas fa-sign-in-alt me-2"></i>Entrar
+            </a>
+            <a href="#features" class="btn btn-outline-secondary btn-lg px-4">
+                <i class="fas fa-info-circle me-2"></i>Saiba Mais
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">Recursos Principais</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-tasks fa-3x text-primary mb-3"></i>
+                        <h3 class="card-title h4">Gerenciamento Simplificado</h3>
+                        <p class="card-text">Gerencie todas as suas solicitações de extração em um único lugar de forma organizada.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                        <h3 class="card-title h4">Segurança Garantida</h3>
+                        <p class="card-text">Seus dados são protegidos com os mais altos padrões de segurança.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                        <h3 class="card-title h4">Análise em Tempo Real</h3>
+                        <p class="card-text">Acompanhe o status e progresso de suas solicitações em tempo real.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="p-5 text-center bg-primary text-white rounded-3">
+            <h2 class="mb-4">Comece a usar agora</h2>
+            <p class="lead mb-4">Simplifique seu processo de extração hoje mesmo.</p>
+            <a href="{% url 'extraction:login' %}" class="btn btn-light btn-lg">
+                <i class="fas fa-user-plus me-2"></i>Acessar Sistema
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+</script>
+{% endblock %}
